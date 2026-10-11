@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createScan, getScans } from '../services/scanService';
+import { createScan, getScans } from '../services/scanservice';
 
 const initialForm = {
   appName: 'production-devsecops-platform',

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import HealthStatus from '../components/HealthStatus';
 import ScanDashboard from '../components/ScanDashboard';
 import AuthPanel from '../components/AuthPanel';
+import PipelineDashboard from '../components/PipelineDashboard'
 
 function getSavedUser() {
   try {
@@ -37,6 +38,7 @@ export default function Home() {
           </p>
           <button onClick={logout}>Sign out</button>
           <ScanDashboard />
+          <pipelineDashboard />
         </>
       ) : (
         <AuthPanel onAuthenticated={handleAuthenticated} />
