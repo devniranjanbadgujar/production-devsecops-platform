@@ -1,11 +1,46 @@
+import { useState } from 'react';
 import HealthStatus from '../components/HealthStatus';
+import ScanDashboard from '../components/ScanDashboard';
+import AuthPanel from '../components/AuthPanel';
+
+function getSavedUser() {
+  try {
+    return JSON.parse(sessionStorage.getItem('authUser') || 'null');
+  } catch {
+    return null;
+  }
+}
 
 export default function Home() {
+  const [user, setUser] = useState(getSavedUser);
+
+  function handleAuthenticated(authenticatedUser) {
+    sessionStorage.setItem('authUser', JSON.stringify(authenticatedUser));
+    setUser(authenticatedUser);
+  }
+
+  function logout() {
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('authUser');
+    setUser(null);
+  }
+
   return (
-    <div>
-      <h1>Platform Dashboard</h1>
-      <p>Frontend foundation and backend connectivity.</p>
+    <main>
+      <h1>Production-Grade DevSecOps Platform</h1>
       <HealthStatus />
-    </div>
+
+      {user ? (
+        <>
+          <p>
+            Signed in as <strong>{user.name}</strong>
+          </p>
+          <button onClick={logout}>Sign out</button>
+          <ScanDashboard />
+        </>
+      ) : (
+        <AuthPanel onAuthenticated={handleAuthenticated} />
+      )}
+    </main>
   );
 }

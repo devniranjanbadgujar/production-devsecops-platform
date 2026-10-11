@@ -7,7 +7,7 @@ const healthRoutes = require('./routes/health.routes');
 const notFound = require('./middleware/not-found.middleware');
 const errorHandler = require('./middleware/error.middleware');
 const scansRoutes = require('./routes/scans.routes');
-
+const authroutes = require('./routes/auth.routes');
 const app = express();
 
 app.use(helmet());
@@ -17,7 +17,7 @@ app.use(morgan('dev'));
 
 app.use('/api', healthRoutes);
 app.use('/api', scansRoutes);
-
+app.use('/api', authroutes);
 app.use(notFound);
 app.use(errorHandler);
 

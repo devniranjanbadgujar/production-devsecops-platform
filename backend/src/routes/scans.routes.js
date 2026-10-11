@@ -1,9 +1,10 @@
 const express = require('express');
 const Scan = require('../models/scan.model');
+const authenticate = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
-router.get('/scans', async (req, res, next) => {
+router.get('/scans', authenticate, async (req, res, next) => {
   try {
     const scans = await Scan.find().sort({ createdAt: -1 }).limit(100);
 
@@ -16,7 +17,7 @@ router.get('/scans', async (req, res, next) => {
   }
 });
 
-router.post('/scans', async (req, res, next) => {
+router.post('/scans', authenticate, async (req, res, next) => {
   try {
     const scan = await Scan.create(req.body);
 
