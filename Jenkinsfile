@@ -1,4 +1,4 @@
-pipeline {
+﻿pipeline {
     agent any 
 
     options {
@@ -16,7 +16,7 @@ pipeline {
 
         stage('Backend CI') {
             steps {
-                sh 'cd backend && npm ci && npm test && npm lint'
+                sh 'cd backend && npm ci && npm test && npm run lint'
             }
         }
 
