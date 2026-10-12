@@ -38,7 +38,7 @@ export default function Home() {
           </p>
           <button onClick={logout}>Sign out</button>
           <ScanDashboard />
-          <pipelineDashboard />
+          <PipelineDashboard />
         </>
       ) : (
         <AuthPanel onAuthenticated={handleAuthenticated} />
