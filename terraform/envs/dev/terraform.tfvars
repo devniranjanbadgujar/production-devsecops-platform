@@ -1,0 +1,5 @@
+aws_region   = "ap-south-1"
+project_name = "production-devsecops"
+environment  = "dev"
+cluster_name = "devsecops-platform"
+admin_cidr   = "103.71.16.18/32"
