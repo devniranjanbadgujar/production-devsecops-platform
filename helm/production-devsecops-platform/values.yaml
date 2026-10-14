@@ -1,0 +1,20 @@
+backend:
+  image: production-devsecops-platform-backend
+  tag: "5"
+  pullPolicy: Never
+
+frontend:
+  image: production-devsecops-platform-frontend
+  tag: "5"
+  pullPolicy: Never
+
+mongodb:
+  image: mongo:7
+  storage: 1Gi
+
+redis:
+  image: redis:7-alpine
+  storage: 1Gi
+
+secrets:
+  jwtSecret: ""
