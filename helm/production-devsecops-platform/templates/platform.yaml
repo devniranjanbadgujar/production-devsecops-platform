@@ -7,6 +7,7 @@ data:
   PORT: "8080"
   MONGODB_URI: "mongodb://mongodb:27017/production_devsecops"
   REDIS_URL: "redis://redis:6379"
+{{- if not .Values.secrets.existingSecret }}
 ---
 apiVersion: v1
 kind: Secret
@@ -14,7 +15,8 @@ metadata:
   name: platform-secret
 type: Opaque
 data:
-  JWT_SECRET: {{ required "Set secrets.jwtSecret during installation" .Values.secrets.jwtSecret | b64enc | quote }}
+  JWT_SECRET: {{ required "Set secrets.jwtSecret or secrets.existingSecret during installation" .Values.secrets.jwtSecret | b64enc | quote }}
+{{- end }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -153,7 +155,7 @@ spec:
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: platform-secret
+                  name: {{ .Values.secrets.existingSecret | default "platform-secret" }}
                   key: JWT_SECRET
             - name: JENKINS_REPORT_TOKEN
               valueFrom:
