@@ -85,10 +85,8 @@ pipeline {
 
             archiveArtifacts artifacts: 'reports/*.json,backend/reports/junit.xml',
                              allowEmptyArchive: true
-        }
 
-
-        script {
+            script {
             def result = currentBuild.currentResult ?: 'SUCCESS'
             def reportStatus = result == 'SUCCESS' ? 'success' :
                 (result == 'ABORTED' ? 'aborted' : 'failed')
@@ -129,6 +127,7 @@ pipeline {
             }
 
             sh 'rm -f jenkins-report.json'
+        }
         }
 
 
