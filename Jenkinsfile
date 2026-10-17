@@ -87,6 +87,51 @@ pipeline {
                              allowEmptyArchive: true
         }
 
+
+        script {
+            def result = currentBuild.currentResult ?: 'SUCCESS'
+            def reportStatus = result == 'SUCCESS' ? 'success' :
+                (result == 'ABORTED' ? 'aborted' : 'failed')
+
+            def reportPayload = [
+                projectName: env.JOB_NAME ?: 'production-devsecops-platform',
+                branch: env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'main',
+                commitSha: env.GIT_COMMIT ?: '',
+                status: reportStatus,
+                durationSeconds: Math.max(
+                    0,
+                    (currentBuild.duration / 1000) as Integer
+                ),
+                logs: "Jenkins build ${env.BUILD_TAG}; result=${result}. See Jenkins console and archived reports for details."
+            ]
+
+            writeFile(
+                file: 'jenkins-report.json',
+                text: groovy.json.JsonOutput.toJson(reportPayload)
+            )
+
+            withCredentials([
+                string(
+                    credentialsId: 'jenkins-report-token',
+                    variable: 'JENKINS_REPORT_TOKEN'
+                )
+            ]) {
+                sh '''
+                    set +x
+                    curl --silent --show-error --fail \
+                    --max-time 10 \
+                    -X POST \
+                    "http://host.docker.internal:8090/api/integrations/jenkins/pipelines" \
+                    -H "Authorization: Bearer $JENKINS_REPORT_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    --data-binary @jenkins-report.json
+                '''
+            }
+
+            sh 'rm -f jenkins-report.json'
+        }
+
+
         success {
             echo 'CI passed: tests, lint, builds, dependency audits, and image scans completed.'
         }
