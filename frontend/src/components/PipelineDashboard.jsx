@@ -70,16 +70,21 @@ export default function PipelineDashboard() {
     width: '100%',
     padding: 10,
     boxSizing: 'border-box',
+    background: '#fff',
+    color: '#111827',
+    border: '1px solid #d1d5db',
   };
 
   const cardStyle = {
+    background: '#fff',
     border: '1px solid #e5e7eb',
+    color: '#111827',
     borderRadius: 10,
     padding: 16,
   };
 
   return (
-    <section style={{ marginTop: 32, color: '#111827' }}>
+    <section style={{ marginTop: 32, color: '#f3f4f6' }}>
       <h2>CI/CD Pipeline Runs</h2>
       <p style={{ color: '#6b7280' }}>
         Track build and deployment executions.
@@ -188,7 +193,7 @@ export default function PipelineDashboard() {
 
       {error && <p style={{ color: '#dc2626' }}>{error}</p>}
 
-      <div style={{ overflowX: 'auto', marginTop: 24 }}>
+      <div style={{ ...cardStyle, overflowX: 'auto', marginTop: 24 }}>
         <h3>Recent executions</h3>
 
         {loading ? (
