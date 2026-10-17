@@ -97,7 +97,7 @@ pipeline {
                 commitSha: sh(
                     script: 'git rev-parse HEAD',
                     returnStdout: true
-                    ).trim()
+                    ).trim(),
                 status: reportStatus,
                 durationSeconds: Math.max(
                     0,
