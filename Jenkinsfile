@@ -103,9 +103,11 @@ pipeline {
                     0,
                     (currentBuild.duration / 1000) as Integer
                 ),
+                buildNumber: env.BUILD_NUMBER,
+                buildUrl: env.BUILD_URL,
+                consoleUrl: "${env.BUILD_URL}console",
                 logs: "Jenkins build ${env.BUILD_TAG}; result=${result}. See Jenkins console and archived reports for details."
             ]
-
             writeFile(
                 file: 'jenkins-report.json',
                 text: groovy.json.JsonOutput.toJson(reportPayload)

@@ -31,6 +31,22 @@ const pipelineSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    buildNumber: {
+      type: String,
+      default: '',
+    },
+    buildUrl: {
+      type: String,
+      default: '',
+    },
+    consoleUrl: {
+    type: String,
+    default: '',
+    },
+    logs: {
+      type: String,
+      default: '',
+    },
     logs: {
       type: String,
       default: '',

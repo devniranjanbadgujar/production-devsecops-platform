@@ -229,11 +229,23 @@ export default function PipelineDashboard() {
                   <td>{pipeline.status}</td>
                   <td>{pipeline.durationSeconds}s</td>
                   <td>{new Date(pipeline.createdAt).toLocaleString()}</td>
+                  
                   <td>
-                    <button onClick={() => setSelectedLogs(pipeline)}>
-                      View
-                    </button>
+                    {pipeline.consoleUrl ? (
+                      <a
+                        href={pipeline.consoleUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View
+                      </a>
+                    ) : (
+                      <button onClick={() => setSelectedLogs(pipeline)}>
+                        View
+                      </button>
+                    )}
                   </td>
+
                 </tr>
               ))}
             </tbody>
