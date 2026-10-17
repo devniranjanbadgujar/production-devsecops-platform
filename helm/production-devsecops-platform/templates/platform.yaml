@@ -155,6 +155,16 @@ spec:
                 secretKeyRef:
                   name: platform-secret
                   key: JWT_SECRET
+            - name: JENKINS_REPORT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jenkins-report-credentials
+                  key: JENKINS_REPORT_TOKEN
+            - name: JENKINS_REPORT_USER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: jenkins-report-credentials
+                  key: JENKINS_REPORT_USER_ID
           readinessProbe:
             httpGet:
               path: /api/health

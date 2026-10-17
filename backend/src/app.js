@@ -9,6 +9,7 @@ const errorHandler = require('./middleware/error.middleware');
 const scansRoutes = require('./routes/scans.routes');
 const authroutes = require('./routes/auth.routes');
 const pipelinesRoutes = require('./routes/pipelines.routes');
+const jenkinsReportRoutes = require('./routes/jenkins-report.routes');
 const app = express();
 
 app.use(helmet());
@@ -20,6 +21,7 @@ app.use('/api', healthRoutes);
 app.use('/api', authroutes);
 app.use('/api', scansRoutes);
 app.use('/api/pipelines', pipelinesRoutes);
+app.use('/api/integrations/jenkins/pipelines', jenkinsReportRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
