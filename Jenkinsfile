@@ -94,7 +94,10 @@ pipeline {
             def reportPayload = [
                 projectName: env.JOB_NAME ?: 'production-devsecops-platform',
                 branch: env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'main',
-                commitSha: env.GIT_COMMIT ?: '',
+                commitSha: sh(
+                    script: 'git rev-parse HEAD',
+                    returnStdout: true
+                    ).trim()
                 status: reportStatus,
                 durationSeconds: Math.max(
                     0,
