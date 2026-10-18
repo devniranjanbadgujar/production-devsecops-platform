@@ -1,4 +1,15 @@
 pipeline {
+    parameters {
+        booleanParam(name: 'PUBLISH_TO_ECR', defaultValue: false,
+                     description: 'Push scanned images to Amazon ECR')
+        string(name: 'AWS_REGION', defaultValue: 'ap-south-1',
+               description: 'AWS region for ECR')
+        string(name: 'AWS_ACCOUNT_ID', defaultValue: '824953034387',
+               description: '12-digit AWS account ID')
+        string(name: 'JENKINS_REPORT_URL',
+               defaultValue: 'http://host.docker.internal:8090/api/integrations/jenkins/pipelines',
+               description: 'Backend Jenkins-report endpoint')
+    }
     agent any
 
     options {
@@ -76,6 +87,34 @@ pipeline {
                 '''
             }
         }
+
+        stage('Publish Images to ECR') {
+            when {
+                expression { params.PUBLISH_TO_ECR }
+            }
+            steps {
+                sh '''
+                    set -eu
+                    echo "$AWS_ACCOUNT_ID" | grep -Eq '^[0-9]{12}$' || {
+                        echo "AWS_ACCOUNT_ID must be 12 digits."
+                        exit 1
+                    }
+
+                    aws sts get-caller-identity
+                    REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                    aws ecr get-login-password --region "$AWS_REGION" |
+                      docker login --username AWS --password-stdin "$REGISTRY"
+
+                    docker tag "production-devsecops-platform-backend:${BUILD_NUMBER}" \
+                      "${REGISTRY}/production-devsecops-backend:${BUILD_NUMBER}"
+                    docker tag "production-devsecops-platform-frontend:${BUILD_NUMBER}" \
+                      "${REGISTRY}/production-devsecops-frontend:${BUILD_NUMBER}"
+
+                    docker push "${REGISTRY}/production-devsecops-backend:${BUILD_NUMBER}"
+                    docker push "${REGISTRY}/production-devsecops-frontend:${BUILD_NUMBER}"
+                '''
+            }
+        }
     }
 
     post {
@@ -124,10 +163,10 @@ pipeline {
                     curl --silent --show-error --fail \
                     --max-time 10 \
                     -X POST \
-                    "http://host.docker.internal:8090/api/integrations/jenkins/pipelines" \
+                    "$JENKINS_REPORT_URL" \
                     -H "Authorization: Bearer $JENKINS_REPORT_TOKEN" \
                     -H "Content-Type: application/json" \
-                    --data-binary @jenkins-report.json
+                    --data-binary @jenkins-report.json || echo "WARNING: Jenkins report endpoint unavailable; continuing."
                 '''
             }
 
