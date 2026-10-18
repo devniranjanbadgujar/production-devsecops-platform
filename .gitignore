@@ -39,3 +39,7 @@ Thumbs.db
 # Logs
 logs/
 *.log
+
+# Terraform saved plans
+tfplan
+*.tfplan

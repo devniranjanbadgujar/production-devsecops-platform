@@ -17,7 +17,12 @@ RUN apt-get update \
     && echo "deb [signed-by=/etc/apt/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(. /etc/os-release && echo "$VERSION_CODENAME") main" \
        > /etc/apt/sources.list.d/trivy.list \
     && apt-get update \
-    && apt-get install -y --no-install-recommends docker-ce-cli nodejs git trivy \
+    && apt-get install -y --no-install-recommends docker-ce-cli nodejs git trivy unzip \
+    && curl -fsSL 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o /tmp/awscliv2.zip \
+    && unzip -q /tmp/awscliv2.zip -d /tmp \
+    && /tmp/aws/install \
+    && rm -rf /tmp/aws /tmp/awscliv2.zip \
+    && aws --version \
     && node --version \
     && npm --version \
     && docker --version \

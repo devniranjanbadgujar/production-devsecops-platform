@@ -1,12 +1,12 @@
 backend:
   image: production-devsecops-platform-backend
   tag: "5"
-  pullPolicy: Never
+  pullPolicy: IfNotPresent
 
 frontend:
   image: production-devsecops-platform-frontend
   tag: "5"
-  pullPolicy: Never
+  pullPolicy: IfNotPresent
 
 mongodb:
   image: mongo:7

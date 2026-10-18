@@ -30,10 +30,10 @@ module "eks" {
   public_subnet_ids            = module.network.public_subnet_ids
   kubernetes_version           = "1.36"
   endpoint_public_access_cidrs = [var.admin_cidr]
-  node_instance_types          = ["t3.medium"]
-  node_desired_size            = 2
+  node_instance_types          = ["m7i-flex.large"]
+  node_desired_size            = 1
   node_min_size                = 1
-  node_max_size                = 3
+  node_max_size                = 1
 }
 
 output "vpc_id" {
@@ -50,4 +50,63 @@ output "cluster_endpoint" {
 
 output "node_group_name" {
   value = module.eks.node_group_name
+}
+
+# Amazon ECR repositories for application images.
+locals {
+  ecr_repositories = {
+    backend  = "${var.project_name}-backend"
+    frontend = "${var.project_name}-frontend"
+  }
+}
+
+resource "aws_ecr_repository" "app" {
+  for_each = local.ecr_repositories
+
+  name                 = each.value
+  image_tag_mutability = "MUTABLE"
+  force_delete         = false
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  encryption_configuration {
+    encryption_type = "AES256"
+  }
+
+  tags = {
+    Name        = each.value
+    Project     = var.project_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_ecr_lifecycle_policy" "app" {
+  for_each = aws_ecr_repository.app
+
+  repository = each.value.name
+
+  policy = jsonencode({
+    rules = [{
+      rulePriority = 1
+      description  = "Retain the 20 most recent images"
+      selection = {
+        tagStatus   = "any"
+        countType   = "imageCountMoreThan"
+        countNumber = 20
+      }
+      action = {
+        type = "expire"
+      }
+    }]
+  })
+}
+
+output "ecr_repository_urls" {
+  description = "ECR repository URLs for backend and frontend images"
+  value = {
+    for name, repository in aws_ecr_repository.app :
+    name => repository.repository_url
+  }
 }
