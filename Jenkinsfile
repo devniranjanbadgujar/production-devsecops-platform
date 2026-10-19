@@ -39,19 +39,23 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
                 script {
+                    def scmVars = checkout scm
+
                     env.IMAGE_TAG = sh(
                         script: 'git rev-parse --short=12 HEAD',
                         returnStdout: true
                     ).trim()
-                    env.SOURCE_BRANCH = (
-                        env.BRANCH_NAME ?: env.GIT_BRANCH ?: ''
-                    ).replace('origin/', '')
+
+                    def branch = scmVars.GIT_BRANCH ?: env.GIT_BRANCH ?: env.BRANCH_NAME ?: ''
+                    env.SOURCE_BRANCH = branch.replaceFirst(/^origin\//, '')
+
                     env.ECR_REGISTRY =
                         "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.AWS_REGION}.amazonaws.com"
+
+                    echo "Detected SCM branch: ${branch}"
+                    echo "Source branch: ${env.SOURCE_BRANCH}; image tag: ${env.IMAGE_TAG}"
                 }
-                echo "Source branch: ${env.SOURCE_BRANCH}; image tag: ${env.IMAGE_TAG}"
             }
         }
 
