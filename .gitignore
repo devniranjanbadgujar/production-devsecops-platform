@@ -48,3 +48,6 @@ tfplan
 terraform/envs/addons/terraform.tfvars
 terraform/envs/addons/terraform.tfstate
 terraform/envs/addons/terraform.tfstate.*
+
+# EC2 private keys
+*.pem
