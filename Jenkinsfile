@@ -24,7 +24,7 @@ pipeline {
         )
         string(
             name: 'JENKINS_REPORT_URL',
-            defaultValue: '',
+            defaultValue: 'http://k8s-producti-backendr-368f76d20f-50a700fb9e8c0498.elb.ap-south-1.amazonaws.com:8080/api/integrations/jenkins/pipelines',
             description: 'Optional reachable backend Jenkins-report endpoint; leave blank until configured'
         )
     }
