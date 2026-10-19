@@ -51,3 +51,4 @@ terraform/envs/addons/terraform.tfstate.*
 
 # EC2 private keys
 *.pem
+
