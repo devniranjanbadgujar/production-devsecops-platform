@@ -65,7 +65,7 @@ router.post('/', authenticateJenkinsReport, async (req, res, next) => {
     });
 
     return res.status(201).json({
-      status: 'ok',
+      status: 'okay',
       data: { id: pipeline._id, status: pipeline.status },
     });
   } catch (error) {
