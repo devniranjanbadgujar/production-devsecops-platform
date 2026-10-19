@@ -274,6 +274,68 @@ ASKPASS
                     def reportStatus = result == 'SUCCESS' ? 'success' :
                         (result == 'ABORTED' ? 'aborted' : 'failed')
 
+                    def scanReports = []
+                    def scanFiles = [
+                        [
+                            appName: 'Backend',
+                            file: 'reports/trivy-backend.json'
+                        ],
+                        [
+                            appName: 'Frontend',
+                            file: 'reports/trivy-frontend.json'
+                        ]
+                    ]
+
+                    def availableScanFiles = scanFiles.findAll {
+                        fileExists(it.file)
+                    }
+
+                    if (availableScanFiles.size() == 2) {
+                        scanFiles.each { target ->
+                            def trivy = new groovy.json.JsonSlurperClassic()
+                                .parseText(readFile(target.file))
+
+                            if (!(trivy instanceof Map) ||
+                                !(trivy.Results instanceof List)) {
+                                error "Invalid Trivy JSON report: ${target.file}"
+                            }
+
+                            def counts = [
+                                critical: 0,
+                                high: 0,
+                                medium: 0,
+                                low: 0
+                            ]
+
+                            trivy.Results.each { scanResult ->
+                                (scanResult.Vulnerabilities ?: []).each { vuln ->
+                                    def severity = vuln.Severity?.toLowerCase()
+
+                                    if (counts.containsKey(severity)) {
+                                        counts[severity]++
+                                    }
+                                }
+                            }
+
+                            scanReports << [
+                                appName: target.appName,
+                                tool: 'Trivy',
+                                status: (
+                                    counts.critical + counts.high > 0
+                                ) ? 'failed' : 'passed',
+                                critical: counts.critical,
+                                high: counts.high,
+                                medium: counts.medium,
+                                low: counts.low
+                            ]
+                        }
+                    } else if (availableScanFiles.size() == 1) {
+                        error 'Only one Trivy report exists; refusing to submit incomplete scan data.'
+                    } else {
+                        echo 'Trivy reports unavailable; no scan records will be submitted for this build.'
+                    }
+
+
                     def reportPayload = [
                         projectName: env.JOB_NAME ?: 'production-devsecops-platform',
                         branch: env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'main',
@@ -289,7 +351,8 @@ ASKPASS
                         buildNumber: env.BUILD_NUMBER,
                         buildUrl: env.BUILD_URL,
                         consoleUrl: "${env.BUILD_URL}console",
-                        logs: "Jenkins build ${env.BUILD_TAG}; result=${result}. See Jenkins console and archived reports."
+                        logs: "Jenkins build ${env.BUILD_TAG}; result=${result}. See Jenkins console and archived reports.",
+                        scanReports: scanReports
                     ]
 
                     writeFile(
