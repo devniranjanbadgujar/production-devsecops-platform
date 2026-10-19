@@ -286,46 +286,45 @@ ASKPASS
                     }
 
                     if (existingScanFiles.size() == 2) {
-                        sh '''
-                            python3 - <<'PY'
-                            import json
 
-                            reports = [
-                                ("Backend", "reports/trivy-backend.json"),
-                                ("Frontend", "reports/trivy-frontend.json"),
-                            ]
+                        sh(
+                            script: '''python3 - <<'PYTHON'
+import json
 
-                            output = []
+reports = [
+    ("Backend", "reports/trivy-backend.json"),
+    ("Frontend", "reports/trivy-frontend.json"),
+]
+output = []
 
-                            for app_name, filename in reports:
-                                with open(filename, encoding="utf-8") as report_file:
-                                    report = json.load(report_file)
+for app_name, filename in reports:
+    with open(filename, encoding="utf-8") as report_file:
+        report = json.load(report_file)
 
-                                if not isinstance(report, dict) or not isinstance(report.get("Results"), list):
-                                    raise SystemExit(f"Invalid Trivy report: {filename}")
+    if not isinstance(report, dict) or not isinstance(report.get("Results"), list):
+        raise SystemExit(f"Invalid Trivy report: {filename}")
 
-                                counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    for result in report["Results"]:
+        for vulnerability in (result.get("Vulnerabilities") or []):
+            severity = vulnerability.get("Severity", "").lower()
+            if severity in counts:
+                counts[severity] += 1
 
-                                for result in report["Results"]:
-                                    for vulnerability in (result.get("Vulnerabilities") or []):
-                                        severity = vulnerability.get("Severity", "").lower()
-                                        if severity in counts:
-                                            counts[severity] += 1
+    output.append({
+        "appName": app_name,
+        "tool": "Trivy",
+        "status": "failed" if counts["critical"] + counts["high"] > 0 else "passed",
+        **counts,
+    })
 
-                                output.append({
-                                    "appName": app_name,
-                                    "tool": "Trivy",
-                                    "status": "failed" if counts["critical"] + counts["high"] > 0 else "passed",
-                                    **counts,
-                                })
+with open("trivy-scan-summary.json", "w", encoding="utf-8") as f:
+    json.dump(output, f)
+PYTHON'''
+                        )
 
-                            with open("trivy-scan-summary.json", "w", encoding="utf-8") as output_file:
-                                json.dump(output, output_file)
-                            PY
-                                                    '''
 
-                        // Read the generated summary file as a string.
-                        // The backend reporting payload is assembled below.
+                        scanReports = readJSON(file: 'trivy-scan-summary.json')
                     } else if (existingScanFiles.size() == 1) {
                         error 'Only one Trivy report exists; refusing to submit incomplete scan data.'
                     } else {
