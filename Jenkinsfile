@@ -274,62 +274,59 @@ ASKPASS
                     def reportStatus = result == 'SUCCESS' ? 'success' :
                         (result == 'ABORTED' ? 'aborted' : 'failed')
 
-                    def scanReports = []
+                                        def scanReports = []
+
                     def scanFiles = [
-                        [
-                            appName: 'Backend',
-                            file: 'reports/trivy-backend.json'
-                        ],
-                        [
-                            appName: 'Frontend',
-                            file: 'reports/trivy-frontend.json'
-                        ]
+                        'reports/trivy-backend.json',
+                        'reports/trivy-frontend.json'
                     ]
 
-                    def availableScanFiles = scanFiles.findAll {
-                        fileExists(it.file)
+                    def existingScanFiles = scanFiles.findAll {
+                        fileExists(it)
                     }
 
-                    if (availableScanFiles.size() == 2) {
-                        scanFiles.each { target ->
-                            def trivy = new groovy.json.JsonSlurperClassic()
-                                .parseText(readFile(target.file))
+                    if (existingScanFiles.size() == 2) {
+                        sh '''
+                            python3 - <<'PY'
+                            import json
 
-                            if (!(trivy instanceof Map) ||
-                                !(trivy.Results instanceof List)) {
-                                error "Invalid Trivy JSON report: ${target.file}"
-                            }
-
-                            def counts = [
-                                critical: 0,
-                                high: 0,
-                                medium: 0,
-                                low: 0
+                            reports = [
+                                ("Backend", "reports/trivy-backend.json"),
+                                ("Frontend", "reports/trivy-frontend.json"),
                             ]
 
-                            trivy.Results.each { scanResult ->
-                                (scanResult.Vulnerabilities ?: []).each { vuln ->
-                                    def severity = vuln.Severity?.toLowerCase()
+                            output = []
 
-                                    if (counts.containsKey(severity)) {
-                                        counts[severity]++
-                                    }
-                                }
-                            }
+                            for app_name, filename in reports:
+                                with open(filename, encoding="utf-8") as report_file:
+                                    report = json.load(report_file)
 
-                            scanReports << [
-                                appName: target.appName,
-                                tool: 'Trivy',
-                                status: (
-                                    counts.critical + counts.high > 0
-                                ) ? 'failed' : 'passed',
-                                critical: counts.critical,
-                                high: counts.high,
-                                medium: counts.medium,
-                                low: counts.low
-                            ]
-                        }
-                    } else if (availableScanFiles.size() == 1) {
+                                if not isinstance(report, dict) or not isinstance(report.get("Results"), list):
+                                    raise SystemExit(f"Invalid Trivy report: {filename}")
+
+                                counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+
+                                for result in report["Results"]:
+                                    for vulnerability in (result.get("Vulnerabilities") or []):
+                                        severity = vulnerability.get("Severity", "").lower()
+                                        if severity in counts:
+                                            counts[severity] += 1
+
+                                output.append({
+                                    "appName": app_name,
+                                    "tool": "Trivy",
+                                    "status": "failed" if counts["critical"] + counts["high"] > 0 else "passed",
+                                    **counts,
+                                })
+
+                            with open("trivy-scan-summary.json", "w", encoding="utf-8") as output_file:
+                                json.dump(output, output_file)
+                            PY
+                                                    '''
+
+                        // Read the generated summary file as a string.
+                        // The backend reporting payload is assembled below.
+                    } else if (existingScanFiles.size() == 1) {
                         error 'Only one Trivy report exists; refusing to submit incomplete scan data.'
                     } else {
                         echo 'Trivy reports unavailable; no scan records will be submitted for this build.'
