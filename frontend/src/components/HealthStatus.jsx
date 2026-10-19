@@ -35,7 +35,7 @@ export default function HealthStatus() {
     };
   }, []);
 
-  if (loading) return <p>Checking backend health...</p>;
+  if (loading) return <p>Checking backend health..</p>;
 
   if (error) {
     return <p role="alert">Backend unavailable: {error}</p>;
