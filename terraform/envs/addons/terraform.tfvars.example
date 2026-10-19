@@ -1,0 +1,3 @@
+aws_region  = "ap-south-1"
+cluster_name = "devsecops-platform"
+vpc_id       = "vpc-REPLACE_AFTER_DEV_APPLY"

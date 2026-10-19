@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -31,9 +35,9 @@ module "eks" {
   kubernetes_version           = "1.36"
   endpoint_public_access_cidrs = [var.admin_cidr]
   node_instance_types          = ["m7i-flex.large"]
-  node_desired_size            = 1
+  node_desired_size            = 2
   node_min_size                = 1
-  node_max_size                = 1
+  node_max_size                = 3
 }
 
 output "vpc_id" {
@@ -109,4 +113,27 @@ output "ecr_repository_urls" {
     for name, repository in aws_ecr_repository.app :
     name => repository.repository_url
   }
+}
+
+
+output "ebs_csi_role_arn" {
+  description = "IAM role ARN for the EBS CSI Driver"
+  value       = module.eks.ebs_csi_role_arn
+}
+
+output "load_balancer_controller_role_arn" {
+  description = "IAM role ARN for the AWS Load Balancer Controller"
+  value       = module.eks.load_balancer_controller_role_arn
+}
+
+
+output "aws_region" {
+  description = "AWS region used by the dev infrastructure"
+  value       = var.aws_region
+}
+
+
+output "eks_admin_role_arn" {
+  description = "IAM role ARN for EKS administrator access"
+  value       = module.eks.eks_admin_role_arn
 }

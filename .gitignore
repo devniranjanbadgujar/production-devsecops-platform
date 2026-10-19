@@ -43,3 +43,8 @@ logs/
 # Terraform saved plans
 tfplan
 *.tfplan
+
+# Local Terraform add-ons inputs and state
+terraform/envs/addons/terraform.tfvars
+terraform/envs/addons/terraform.tfstate
+terraform/envs/addons/terraform.tfstate.*
