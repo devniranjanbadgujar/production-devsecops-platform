@@ -52,8 +52,6 @@
 ## Day 8: DevSecOps Checks
 
 - Add Trivy scan
-- Add OWASP dependency check
-- Add SonarQube integration plan
 
 ## Day 9: GitOps with ArgoCD
 
