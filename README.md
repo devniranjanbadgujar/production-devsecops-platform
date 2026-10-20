@@ -6,9 +6,9 @@ A portfolio project demonstrating an end-to-end DevSecOps and GitOps workflow fo
 
 ## Architecture at a glance
 
-![Platform repository architecture](docs/platform-architecture.svg)
+![Platform repository architecture](docs/Architecture/platform-architecture.svg)
 
-The full cross-repository flow is documented in [End-to-end architecture](docs/end-to-end-architecture.md).
+The full cross-repository flow is documented in [End-to-end architecture](docs/Architecture/end-to-end-architecture.svg).
 
 ## What this project demonstrates
 
