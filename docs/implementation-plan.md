@@ -1,4 +1,3 @@
-@'
 # Implementation Plan
 
 ## Day 1: Repository Foundation
@@ -68,4 +67,3 @@
 ## Improvement Over Reference Project
 
 We will keep the same core skeleton but improve structure, documentation, commit history, environment handling, security practices, and step-by-step production readiness.
-'@ | Set-Content docs\implementation-plan.md

@@ -1,4 +1,3 @@
-@'
 # Architecture
 
 ## Project Goal
@@ -32,10 +31,3 @@ Build a production-grade DevSecOps + GitOps platform for a MERN application usin
 - Jenkins controller for CI/CD
 - ArgoCD for GitOps deployment
 - Prometheus and Grafana for monitoring
-
-## Day 1 Scope
-
-Today we only create the clean repository foundation and documentation.
-
-No AWS resources will be created today.
-'@ | Set-Content docs\architecture.md
